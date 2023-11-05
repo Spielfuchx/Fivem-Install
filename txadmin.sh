@@ -1,7 +1,5 @@
 echo 'FiveM Linux Installer'
 
-apt update && apt upgrade
-
 apt install xf tar
 
 mkdir -p /home/FiveM/server
