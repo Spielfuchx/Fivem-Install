@@ -1,3 +1,3 @@
-apt update && apt upgrade
+```apt update && apt upgrade```
 
-bash <(curl -s https://raw.githubusercontent.com/Spielfuchx/Fivem-Install/main/txadmin.sh)
+```bash <(curl -s https://raw.githubusercontent.com/Spielfuchx/Fivem-Install/main/txadmin.sh)```
