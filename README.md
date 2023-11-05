@@ -8,6 +8,8 @@ Step 1
 Step 2
 ```bash <(curl -s https://raw.githubusercontent.com/Spielfuchx/Fivem-Install/main/txadmin.sh)```
 
+FiveM Artefakts 
+
 Gehen Sie jetzt auf diese Seite und klicken Sie mit der linken Maustaste auf Ihre Version (was Sie wollen).
 https://runtime.fivem.net/artifacts/fivem/build_proot_linux/master/
 
