@@ -1,9 +1,7 @@
 Um die Installation durchzuführen, melden Sie sich über SSH bei ```Putty``` an,
 wenn Sie angemeldet sind. Kopieren Sie als erstes ```Step 1``` danach ```Step 2```
--
--
--
--
+
+
 Step 1
 ```apt update && apt upgrade -y```
 
