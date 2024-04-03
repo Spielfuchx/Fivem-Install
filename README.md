@@ -3,10 +3,14 @@ wenn Sie angemeldet sind. Kopieren Sie als erstes ```Step 1``` danach ```Step 2`
 
 
 Step 1
-```apt update && apt upgrade -y```
+```
+apt update && apt upgrade -y
+```
 
 Step 2
-```bash <(curl -s https://raw.githubusercontent.com/Spielfuchx/Fivem-Install/main/txadmin.sh)```
+```
+bash <(curl -s https://raw.githubusercontent.com/Spielfuchx/Fivem-Install/main/txadmin.sh)
+```
 
 FiveM Artefakts 
 
