@@ -1,4 +1,4 @@
-echo 'FiveM Linux Installer'
+echo 'FiveM TxAdmin Linux Installer von SpielFuchx'
 
 apt install xf tar
 
