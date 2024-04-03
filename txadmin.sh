@@ -27,5 +27,5 @@ cd /home/FiveM/server && screen ./run.sh
 
 echo 'Erfolgreich installiert! Jetzt müssen Sie in den Ordner cd /home/FiveM/server wechseln und die Datei run.sh ausführen --> ./run.sh'
 
-echo 'Außerdem wurde ein Crontab erfolgreich installiert. Bei einen Server neustart wird FIveM/Tx Admin automatisch Gestartet.'
+echo 'Außerdem wurde ein Crontab erfolgreich installiert. Bei einen Server neustart wird FIveM / TxAdmin automatisch Gestartet.'
 
