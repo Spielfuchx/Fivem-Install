@@ -1,118 +1,59 @@
 #!/bin/bash
 
-echo '🛠️ FiveM TxAdmin Linux Installer von SpielFuchx (2x Server Edition)'
+echo 'FiveM TxAdmin Linux Installer von SpielFuchx'
 
+# Installiere benötigte Pakete
 apt update
-apt install wget tar screen -y
+apt install -y xfce4 tar screen wget
 
-# Ordnerstruktur erstellen
-mkdir -p /home/FiveM/{server1,server2,artifacts}
-cd /home/FiveM/artifacts
+# Serververzeichnis erstellen
+mkdir -p /home/FiveM/server
+cd /home/FiveM/server
 
-# Artifacts herunterladen
-echo '🌐 Link zu den FiveM-Artifakten eingeben (fx.tar.xz):'
+# Benutzer nach dem Artifact-Link fragen
+echo 'Geben Sie den Link zu den FiveM-Artifakten ein (.tar.xz Datei):'
 read link
 
+# Datei herunterladen
 wget -O fx.tar.xz "$link"
+
+# Entpacken
+echo 'Entpacken der FiveM-Dateien...'
 tar xf fx.tar.xz
 rm fx.tar.xz
+echo 'Artifacts installiert'
 
-echo '✅ Artifacts entpackt'
-
-# Artifacts kopieren
-cp -r . /home/FiveM/server1/alpine
-cp -r . /home/FiveM/server2/alpine
-
-# server.cfg für beide Server
-cat <<EOF > /home/FiveM/server1/server.cfg
-endpoint_add_tcp "0.0.0.0:30120"
-endpoint_add_udp "0.0.0.0:30120"
-sv_hostname "Mein Server 1"
-# sv_licenseKey ""
-EOF
-
-cat <<EOF > /home/FiveM/server2/server.cfg
-endpoint_add_tcp "0.0.0.0:30130"
-endpoint_add_udp "0.0.0.0:30130"
-sv_hostname "Mein Server 2"
-# sv_licenseKey ""
-EOF
-
-# Start/Stop/Status für Server 1
-cat <<EOF > /home/FiveM/server1/run.sh
+# run.sh erstellen
+cat << 'EOF' > /home/FiveM/server/run.sh
 #!/bin/bash
-echo "Starte FiveM Server 1..."
-screen -dmS fivem1 /home/FiveM/server1/alpine/run.sh +exec ../server.cfg
+echo "Starte FiveM Server..."
+cd /home/FiveM/server
+./run.sh
 EOF
+chmod +x /home/FiveM/server/run.sh
 
-cat <<EOF > /home/FiveM/server1/stop.sh
+# stop.sh erstellen
+cat << 'EOF' > /home/FiveM/server/stop.sh
 #!/bin/bash
-echo "Stoppe FiveM Server 1..."
-screen -S fivem1 -X quit
-EOF
+echo "Beende FiveM TxAdmin Server..."
 
-cat <<EOF > /home/FiveM/server1/status.sh
-#!/bin/bash
-if screen -list | grep -q "fivem1"; then
-    echo "Server 1 läuft ✅"
+if screen -list | grep -q "fivem"; then
+    screen -S fivem -X quit
+    echo "FiveM Server wurde gestoppt."
 else
-    echo "Server 1 gestoppt ❌"
+    echo "Keine laufende 'fivem'-Screen-Session gefunden."
 fi
 EOF
+chmod +x /home/FiveM/server/stop.sh
 
-# Start/Stop/Status für Server 2
-cat <<EOF > /home/FiveM/server2/run.sh
-#!/bin/bash
-echo "Starte FiveM Server 2..."
-screen -dmS fivem2 /home/FiveM/server2/alpine/run.sh +exec ../server.cfg
-EOF
+# Crontab-Eintrag zum automatischen Start bei Reboot
+echo 'Crontab wird installiert und eingerichtet...'
+(crontab -l 2>/dev/null; echo "@reboot screen -dmS fivem /home/FiveM/server/run.sh > /home/FiveM/server/cron.log 2>&1") | crontab -
 
-cat <<EOF > /home/FiveM/server2/stop.sh
-#!/bin/bash
-echo "Stoppe FiveM Server 2..."
-screen -S fivem2 -X quit
-EOF
+# Starte FiveM in benannter Screen-Session
+screen -dmS fivem /home/FiveM/server/run.sh
 
-cat <<EOF > /home/FiveM/server2/status.sh
-#!/bin/bash
-if screen -list | grep -q "fivem2"; then
-    echo "Server 2 läuft ✅"
-else
-    echo "Server 2 gestoppt ❌"
-fi
-EOF
-
-# Gemeinsame Start/Stop-Skripte
-cat <<EOF > /home/FiveM/start_all.sh
-#!/bin/bash
-/home/FiveM/server1/run.sh
-/home/FiveM/server2/run.sh
-EOF
-
-cat <<EOF > /home/FiveM/stop_all.sh
-#!/bin/bash
-/home/FiveM/server1/stop.sh
-/home/FiveM/server2/stop.sh
-EOF
-
-chmod +x /home/FiveM/server1/*.sh
-chmod +x /home/FiveM/server2/*.sh
-chmod +x /home/FiveM/start_all.sh /home/FiveM/stop_all.sh
-
-# Cronjobs für Autostart
-echo '🕒 Cronjobs werden eingerichtet...'
-(crontab -l 2>/dev/null; echo "@reboot /home/FiveM/server1/run.sh > /home/FiveM/server1/cron.log 2>&1") | crontab -
-(crontab -l 2>/dev/null; echo "@reboot /home/FiveM/server2/run.sh > /home/FiveM/server2/cron.log 2>&1") | crontab -
-
-echo '✅ Installation abgeschlossen!'
-echo '📂 Serververzeichnisse:'
-echo '   - /home/FiveM/server1'
-echo '   - /home/FiveM/server2'
-echo ''
-echo '🧪 Starte beide Server manuell mit:'
-echo '   /home/FiveM/start_all.sh'
-echo '🛑 Stoppe beide Server mit:'
-echo '   /home/FiveM/stop_all.sh'
-echo 'ℹ️ Einzelstatus prüfen mit:'
-echo '   /home/FiveM/server1/status.sh'
-echo '   /home/FiveM/server2/status.sh'
+echo '✅ Erfolgreich installiert!'
+echo 'ℹ️  Wechseln Sie in den Ordner mit: cd /home/FiveM/server'
+echo '▶️  Starten mit: ./run.sh (oder automatisch durch Crontab)'
+echo '⏹️  Stoppen mit: ./stop.sh'
