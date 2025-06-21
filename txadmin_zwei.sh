@@ -1,61 +1,48 @@
+#!/bin/bash
+
 echo 'FiveM TxAdmin Linux Installer von SpielFuchx'
 
+# Notwendige Pakete installieren
 apt update
-apt install -y xf tar screen
+apt install -y xf tar wget screen cron
 
+# Verzeichnisstruktur erstellen
 mkdir -p /home/FiveM/server
 cd /home/FiveM/server
 
+# Benutzer nach dem Artifact-Link fragen
 echo 'Geben Sie den Link zu den FiveM-Artifakten ein:'
 read link
 wget $link -O fx.tar.xz
 
+# Artefakte entpacken
 echo 'Entpacken der FiveM-Dateien...'
 tar xf fx.tar.xz
+rm -r fx.tar.xz
 echo 'Artifacts installiert'
 
-rm fx.tar.xz
+# Start- und Stop-Skripte erstellen
+cat << 'EOF' > /home/FiveM/server/start.sh
+#!/bin/bash
+cd /home/FiveM/server
+screen -dmS fivem ./run.sh
+EOF
 
-# Funktion: Server starten
-start_server() {
-    echo "Starte FiveM Server in einer screen Session namens 'fivem'..."
-    screen -dmS fivem ./run.sh
-    echo "Server gestartet."
-}
+cat << 'EOF' > /home/FiveM/server/stop.sh
+#!/bin/bash
+screen -S fivem -X quit
+EOF
 
-# Funktion: Server stoppen
-stop_server() {
-    echo "Stoppe FiveM Server..."
-    screen -S fivem -X quit
-    echo "Server gestoppt."
-}
+chmod +x /home/FiveM/server/start.sh /home/FiveM/server/stop.sh
 
-echo 'Server Starten: start'
-echo 'Server Stoppen: stop'
-echo 'Status überprüfen: status'
+# Crontab für Autostart einrichten
+echo 'Crontab wird installiert und eingerichtet'
+(crontab -l 2>/dev/null; echo "@reboot /home/FiveM/server/start.sh > /home/FiveM/server/cron.log 2>&1") | crontab -
 
-while true; do
-    read -p "Befehl eingeben (start/stop/status/exit): " cmd
-    case "$cmd" in
-        start)
-            start_server
-            ;;
-        stop)
-            stop_server
-            ;;
-        status)
-            if screen -list | grep -q "fivem"; then
-                echo "Server läuft."
-            else
-                echo "Server ist nicht aktiv."
-            fi
-            ;;
-        exit)
-            echo "Beende das Skript."
-            break
-            ;;
-        *)
-            echo "Unbekannter Befehl."
-            ;;
-    esac
-done
+# Server direkt starten
+/home/FiveM/server/start.sh
+
+echo 'Erfolgreich installiert!'
+echo 'Jetzt können Sie den Server starten mit: ./start.sh'
+echo 'Oder stoppen mit: ./stop.sh'
+echo 'Die Datei run.sh wird beim Systemstart automatisch ausgeführt.'
