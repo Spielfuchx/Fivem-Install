@@ -1,59 +1,61 @@
-#!/bin/bash
-
 echo 'FiveM TxAdmin Linux Installer von SpielFuchx'
 
-# Installiere benötigte Pakete
 apt update
-apt install -y xfce4 tar screen wget
+apt install -y xf tar screen
 
-# Serververzeichnis erstellen
 mkdir -p /home/FiveM/server
 cd /home/FiveM/server
 
-# Benutzer nach dem Artifact-Link fragen
-echo 'Geben Sie den Link zu den FiveM-Artifakten ein (.tar.xz Datei):'
+echo 'Geben Sie den Link zu den FiveM-Artifakten ein:'
 read link
+wget $link -O fx.tar.xz
 
-# Datei herunterladen
-wget -O fx.tar.xz "$link"
-
-# Entpacken
 echo 'Entpacken der FiveM-Dateien...'
 tar xf fx.tar.xz
-rm fx.tar.xz
 echo 'Artifacts installiert'
 
-# run.sh erstellen
-cat << 'EOF' > /home/FiveM/server/run.sh
-#!/bin/bash
-echo "Starte FiveM Server..."
-cd /home/FiveM/server
-./run.sh
-EOF
-chmod +x /home/FiveM/server/run.sh
+rm fx.tar.xz
 
-# stop.sh erstellen
-cat << 'EOF' > /home/FiveM/server/stop.sh
-#!/bin/bash
-echo "Beende FiveM TxAdmin Server..."
+# Funktion: Server starten
+start_server() {
+    echo "Starte FiveM Server in einer screen Session namens 'fivem'..."
+    screen -dmS fivem ./run.sh
+    echo "Server gestartet."
+}
 
-if screen -list | grep -q "fivem"; then
+# Funktion: Server stoppen
+stop_server() {
+    echo "Stoppe FiveM Server..."
     screen -S fivem -X quit
-    echo "FiveM Server wurde gestoppt."
-else
-    echo "Keine laufende 'fivem'-Screen-Session gefunden."
-fi
-EOF
-chmod +x /home/FiveM/server/stop.sh
+    echo "Server gestoppt."
+}
 
-# Crontab-Eintrag zum automatischen Start bei Reboot
-echo 'Crontab wird installiert und eingerichtet...'
-(crontab -l 2>/dev/null; echo "@reboot screen -dmS fivem /home/FiveM/server/run.sh > /home/FiveM/server/cron.log 2>&1") | crontab -
+echo 'Server Starten: start'
+echo 'Server Stoppen: stop'
+echo 'Status überprüfen: status'
 
-# Starte FiveM in benannter Screen-Session
-screen -dmS fivem /home/FiveM/server/run.sh
-
-echo '✅ Erfolgreich installiert!'
-echo 'ℹ️  Wechseln Sie in den Ordner mit: cd /home/FiveM/server'
-echo '▶️  Starten mit: ./run.sh (oder automatisch durch Crontab)'
-echo '⏹️  Stoppen mit: ./stop.sh'
+while true; do
+    read -p "Befehl eingeben (start/stop/status/exit): " cmd
+    case "$cmd" in
+        start)
+            start_server
+            ;;
+        stop)
+            stop_server
+            ;;
+        status)
+            if screen -list | grep -q "fivem"; then
+                echo "Server läuft."
+            else
+                echo "Server ist nicht aktiv."
+            fi
+            ;;
+        exit)
+            echo "Beende das Skript."
+            break
+            ;;
+        *)
+            echo "Unbekannter Befehl."
+            ;;
+    esac
+done
